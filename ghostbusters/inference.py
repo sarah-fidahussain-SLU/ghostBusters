@@ -398,8 +398,8 @@ class ParticleFilter(InferenceModule):
         the DiscreteDistribution may be useful.
         """
         "*** YOUR CODE HERE ***"
-        newBeliefDistribution = DiscreteDistribution()
-
+        newBeliefDistribution = DiscreteDistribution() 
+        newParticles = []
         particles = self.particles
 
         for particle in particles:
@@ -409,14 +409,14 @@ class ParticleFilter(InferenceModule):
             newBeliefDistribution.normalize()
             
             for particle in range(len(particles)):
-                self.particles[particle] = newBeliefDistribution.sample()
+                newParticles.append(newBeliefDistribution.sample())
 
-        else: 
+            self.particles = newParticles
+
+        else: #total weight of particles is 0
             self.initializeUniformly(gameState)
 
-
-
-        
+ 
 
     def elapseTime(self, gameState):
         """
