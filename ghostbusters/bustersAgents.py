@@ -148,7 +148,6 @@ class GreedyBustersAgent(BustersAgent):
         #get number of living ghosts from boolean list
         activeGhosts = 0
         totalNumberOfGhosts = len(livingGhosts)
-        closestDistance = 1000000
         actionDistance = 1000000
         ghostPosition = None
         pacmanAction = None
@@ -159,13 +158,14 @@ class GreedyBustersAgent(BustersAgent):
 
         #find the closest position out of the remaining uncaptured ghosts
         for index in range(activeGhosts):
+            likelyGhostPosition = 0
             ghostDistribution = livingGhostPositionDistributions[index]
-            likelyGhostPosition = ghostDistribution.argMax()
-            likelyGhostDistance = self.distancer.getDistance(pacmanPosition, likelyGhostPosition)
 
-            if likelyGhostDistance < closestDistance:
-                closestDistance = likelyGhostDistance
-                ghostPosition = likelyGhostPosition
+            for ghosts in ghostDistribution.items():
+                ghostKey = ghosts[0]
+                if ghostDistribution[ghostKey] > likelyGhostPosition:
+                    ghostPosition = ghostKey
+                    likelyGhostPosition = ghostDistribution[ghostKey]
     
         #choose an action that minimizes the maze distance to the closest ghost
         for action in gameState.getLegalPacmanActions():
@@ -173,8 +173,8 @@ class GreedyBustersAgent(BustersAgent):
             likelyPacmanDistance = self.distancer.getDistance(successorPosition, ghostPosition)
             
             if likelyPacmanDistance < actionDistance:
-                actionDistance = likelyPacmanDistance
                 pacmanAction = action
+                actionDistance = likelyPacmanDistance
 
         return pacmanAction
 

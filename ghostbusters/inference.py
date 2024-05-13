@@ -403,7 +403,7 @@ class ParticleFilter(InferenceModule):
         particles = self.particles
 
         for particle in particles:
-            newBeliefDistribution[particle] += self.getObservationProb(observation, gameState.getPacmanPosition(), particle, self.getJailPosition())
+            newBeliefDistribution[particle] += self.getObservationProb(observation, gameState.getPacmanPosition(), particle, self.getJailPosition()) #weight of a particle = probability of observation
 
         if newBeliefDistribution.total() != 0:
             newBeliefDistribution.normalize()
