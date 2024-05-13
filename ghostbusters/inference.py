@@ -75,7 +75,13 @@ class DiscreteDistribution(dict):
         {}
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+
+        #raiseNotDefined() #QU4TION 0 DONE 
+        total = self.total()
+        if total == 0:
+            return None #need to exit here 
+        for key in self.keys():
+            self[key] = self[key] / total
 
     def sample(self):
         """
@@ -98,8 +104,17 @@ class DiscreteDistribution(dict):
         >>> round(samples.count('d') * 1.0/N, 1)
         0.0
         """
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        "*** YOUR CODE HERE ***" #QUESTION 0 DONE 
+        r = random.random() * self.total()
+        running_total = 0.0 #keep as double 
+        for key in self.keys():
+            value = self[key]
+            running_total += value
+
+            if running_total > r:
+                return key
+
+        #raiseNotDefined()
 
 
 class InferenceModule:
@@ -164,12 +179,26 @@ class InferenceModule:
             agent = self.ghostAgent
         return self.getPositionDistributionHelper(gameState, pos, index, agent)
 
-    def getObservationProb(self, noisyDistance, pacmanPosition, ghostPosition, jailPosition):
+    def getObservationProb(self, noisyDistance, pacmanPosition, ghostPosition, jailPosition): #QUESTION 1 DONE
         """
         Return the probability P(noisyDistance | pacmanPosition, ghostPosition).
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        #raiseNotDefined()
+        if ghostPosition == jailPosition:
+            if noisyDistance is None: #if no distance found tehn teh ghost is in jail
+                return 1.0
+            else:
+                return 0.0 #if we see distance when ghost is in jail, its wrong so return 0 for prob 
+        
+ 
+        if noisyDistance is None: #if not in jail and no dist, then dist is wrong so give 0 for prob
+            return 0.0
+
+        accDistance = manhattanDistance(pacmanPosition, ghostPosition) #manhattan distance from pacman to ghost
+        probability = busters.getObservationProbability(noisyDistance, accDistance) #probability of distance given the true distance
+
+        return probability
 
     def setGhostPosition(self, gameState, ghostPosition, index):
         """
@@ -277,7 +306,21 @@ class ExactInference(InferenceModule):
         position is known.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        #raiseNotDefined()
+
+        pacmanPosition = gameState.getPacmanPosition()
+        jailPosition = self.getJailPosition() #jail pos 
+
+        for positions in self.allPositions: #go thru each pos
+            prevBelief = self.beliefs[positions] #previous belief for the current position
+
+            #def getObservationProb(self, noisyDistance, pacmanPosition, ghostPosition, jailPosition):
+            newBelief = self.getObservationProb(observation, pacmanPosition, positions, jailPosition) #new belief comes from observation and the positions 
+            
+            changedBelief = prevBelief * newBelief #new beleif comes from mult old beleif and new belief
+
+            self.beliefs[positions] = changedBelief #change belief for our current posiiton
+
 
         self.beliefs.normalize()
 
@@ -291,7 +334,26 @@ class ExactInference(InferenceModule):
         current position is known.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        #raiseNotDefined()
+        predictBeliefs = DiscreteDistribution() #stores updated beliefs
+
+        for previousPositions in self.allPositions: #go thru each position
+
+            getPositionDistribution = self.getPositionDistribution
+            newPosDist = getPositionDistribution(gameState, previousPositions) #this gets the distribution of the ghosts new position based on its current pos
+            getPositionDistance = newPosDist.items()
+
+            for item in getPositionDistance: #go thru all items in the new pos distribution
+                newPosition = item[0] #grabbing position and probability given an item
+                prob = item[1]
+
+                probOfGhostAtNewPosition = prob * self.beliefs[previousPositions] #product of prob of ghost moving to the new position and the current belief at the old pos
+                predictBeliefs[newPosition] += probOfGhostAtNewPosition
+
+
+        predictBeliefs.normalize() #normalize beleifs to get a true prob distr
+        self.beliefs = predictBeliefs #replacing our old beliefs w new ones
+
 
     def getBeliefDistribution(self):
         return self.beliefs
