@@ -380,7 +380,10 @@ class ParticleFilter(InferenceModule):
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        #for each particle, append each position
+        for _ in range(self.numParticles):
+            for position in self.legalPositions:
+                self.particles.append(position)
 
     def observeUpdate(self, observation, gameState):
         """
@@ -395,7 +398,25 @@ class ParticleFilter(InferenceModule):
         the DiscreteDistribution may be useful.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        newBeliefDistribution = DiscreteDistribution()
+
+        particles = self.particles
+
+        for particle in particles:
+            newBeliefDistribution[particle] += self.getObservationProb(observation, gameState.getPacmanPosition(), particle, self.getJailPosition())
+
+        if newBeliefDistribution.total() != 0:
+            newBeliefDistribution.normalize()
+            
+            for particle in range(len(particles)):
+                self.particles[particle] = newBeliefDistribution.sample()
+
+        else: 
+            self.initializeUniformly(gameState)
+
+
+
+        
 
     def elapseTime(self, gameState):
         """
@@ -414,7 +435,15 @@ class ParticleFilter(InferenceModule):
         This function should return a normalized distribution.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        beliefDistribution = DiscreteDistribution()
+        particles = self.particles
+
+        for particle in particles:
+            beliefDistribution[particle] += 100 #accumulate evidence
+
+        beliefDistribution.normalize()
+        return beliefDistribution
+
 
 
 class JointParticleFilter(ParticleFilter):
