@@ -380,10 +380,11 @@ class ParticleFilter(InferenceModule):
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
-        #for each particle, append each position
-        for _ in range(self.numParticles):
-            for position in self.legalPositions:
-                self.particles.append(position)
+        for i in range(self.numParticles):
+            numOfLegalPos = len(self.legalPositions)
+            inPositonRange = i%numOfLegalPos #added this bc number of particles can be more than num of legal positions
+            position = self.legalPositions[inPositonRange]
+            self.particles.append(position)
 
     def observeUpdate(self, observation, gameState):
         """
@@ -423,8 +424,14 @@ class ParticleFilter(InferenceModule):
         Sample each particle's next state based on its current state and the
         gameState.
         """
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        "*** YOUR CODE HERE ***" #PROBLEM 7
+        #This function should construct a new list of particles that corresponds to each existing particle in self.particles advancing a time step, and then assign this new list back to self.particles
+        newParticles = []
+        for particles in self.particles:
+            newPosDist = self.getPositionDistribution(gameState, particles)
+            newSample = newPosDist.sample()
+            newParticles.append(newSample)
+        self.particles = newParticles
 
     def getBeliefDistribution(self):
         """
@@ -471,7 +478,15 @@ class JointParticleFilter(ParticleFilter):
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+ 
+        permutations = list(itertools.product(self.legalPositions, repeat = self.numGhosts))
+        random.shuffle(permutations)
+
+        for i in range(self.numParticles):
+            numOfLegalPos = len(permutations)
+            position = permutations[i % numOfLegalPos]
+            self.particles.append(position)
+
 
     def addGhostAgent(self, agent):
         """

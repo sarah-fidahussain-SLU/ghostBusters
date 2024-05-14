@@ -151,14 +151,15 @@ class GreedyBustersAgent(BustersAgent):
         actionDistance = 1000000
         ghostPosition = None
         pacmanAction = None
+        likelyGhostPosition = 0
 
         for agentIndex in range(totalNumberOfGhosts):
+            
             if livingGhosts[agentIndex] == True:
                 activeGhosts += 1
 
         #find the closest position out of the remaining uncaptured ghosts
         for index in range(activeGhosts):
-            likelyGhostPosition = 0
             ghostDistribution = livingGhostPositionDistributions[index]
 
             for ghosts in ghostDistribution.items():
